@@ -4,7 +4,7 @@ package com.polytech.alertcovidservicekafka.models;
 import javax.persistence.Id;
 import java.sql.Timestamp;
 
-public class Content {
+public class Location {
     @Id
     private long id_user;
     @Id
@@ -14,14 +14,14 @@ public class Content {
     @Id
     private Double latitude;
 
-    public Content(long id_user, Timestamp date, Double longitude, Double latitude) {
+    public Location(long id_user, Timestamp date, Double longitude, Double latitude) {
         this.id_user = id_user;
         this.date = date;
         this.longitude = longitude;
         this.latitude = latitude;
     }
 
-    public Content() {
+    public Location() {
     }
 
     public long getId_user() {
