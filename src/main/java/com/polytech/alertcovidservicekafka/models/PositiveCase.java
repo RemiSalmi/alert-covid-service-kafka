@@ -1,5 +1,7 @@
 package com.polytech.alertcovidservicekafka.models;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.annotation.Id;
 
 import java.sql.Timestamp;
@@ -29,6 +31,12 @@ public class PositiveCase {
 
     public void setDate(Timestamp date) {
         this.date = date;
+    }
+
+    public String toJson() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        // Java object to JSON string
+        return mapper.writeValueAsString(this);
     }
 
     @Override

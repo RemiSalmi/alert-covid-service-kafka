@@ -57,8 +57,16 @@ public class LocationController {
         if (id_user.equals(positiveCase.getId_user())){
             LocationLogic locationLogic = new LocationLogic();
             List<Location> contactLocation = locationLogic.getContactLocation(locationsStream.getLocations(), positiveCase.getId_user(), positiveCase.getDate());
-            //Call insert location (location by location)
-            //Call notification list ID
+            contactLocation.stream().forEach(location -> {
+                String userIdJson = "[" + location.getId_user() + "]";
+                try {
+                    this.postLocationService_thenCorrect(location.toJson(), authorization);
+                    this.postNotificationService_thenCorrect(userIdJson,authorization);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new ResponseStatusException( HttpStatus.SERVICE_UNAVAILABLE, "some service are unavailable retry later" ) ;
+                }
+            });
             return contactLocation;
         } else {
             throw new ResponseStatusException( HttpStatus.UNAUTHORIZED, "Your not authorized to do this action" ) ;
@@ -72,7 +80,6 @@ public class LocationController {
             throws IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost("http://localhost:8091/locations/");
-        System.out.println();
 
         StringEntity entity = new StringEntity(contactLocationJson);
         httpPost.setEntity(entity);
@@ -85,13 +92,12 @@ public class LocationController {
         client.close();
     }
 
-    private void postNotificationService_thenCorrect(String contactLocationJson, String authorization)
+    private void postNotificationService_thenCorrect(String usersIdJson, String authorization)
             throws IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost("http://localhost:8089/notification/");
-        System.out.println();
 
-        StringEntity entity = new StringEntity(contactLocationJson);
+        StringEntity entity = new StringEntity(usersIdJson);
         httpPost.setEntity(entity);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");

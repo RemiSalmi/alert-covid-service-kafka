@@ -1,6 +1,9 @@
 package com.polytech.alertcovidservicekafka.models;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.persistence.Id;
 import java.sql.Timestamp;
 
@@ -58,5 +61,11 @@ public class Location {
 
     public String toString(){
         return "Je suis l'user avec l'id: " + this.getId_user() +"\nDate: " +this.getDate();
+    }
+
+    public String toJson() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        // Java object to JSON string
+        return mapper.writeValueAsString(this);
     }
 }
