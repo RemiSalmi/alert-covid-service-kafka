@@ -11,6 +11,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,6 +32,13 @@ public class LocationController {
 
     @Autowired
     KafkaProducer kafkaProducer;
+
+    @Value("${LOCATION_URL}")
+    private String locationUrl;
+    @Value("${NOTIFICATION_URL}")
+    private String notificationUrl;
+    @Value("${USER_URL}")
+    private String userUrl;
 
     private LocationsStreamSingleton locationsStream = LocationsStreamSingleton.getInstance();
 
@@ -79,7 +87,7 @@ public class LocationController {
     private void postLocationService_thenCorrect(String contactLocationJson, String authorization)
             throws IOException {
         CloseableHttpClient client = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost("http://localhost:8091/locations/");
+        HttpPost httpPost = new HttpPost(locationUrl);
 
         StringEntity entity = new StringEntity(contactLocationJson);
         httpPost.setEntity(entity);
@@ -95,7 +103,7 @@ public class LocationController {
     private void postNotificationService_thenCorrect(String usersIdJson, String authorization)
             throws IOException {
         CloseableHttpClient client = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost("http://localhost:8089/notification/");
+        HttpPost httpPost = new HttpPost(notificationUrl);
 
         StringEntity entity = new StringEntity(usersIdJson);
         httpPost.setEntity(entity);
@@ -114,7 +122,7 @@ public class LocationController {
         String email = jwt.getClaim("email").asString();
 
         var client = HttpClient.newHttpClient();
-        String url = "http://146.59.234.45:8081/users/" + email;
+        String url = userUrl + email;
         var request = HttpRequest.newBuilder(
                 URI.create(url))
                 .header("Authorization", authorization)
