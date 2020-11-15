@@ -10,16 +10,27 @@ sourceCompatibility = '11'
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
+
+def kafka_version = '2.6.2'
+
 dependencies {
+	implementation 'com.github.grumlimited:geocalc:0.6'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.postgresql:postgresql'
+	implementation 'org.springframework.kafka:spring-kafka:'+ kafka_version
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
+	compile 'org.apache.httpcomponents:httpclient:4.5.13'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.3'
+	implementation 'org.keycloak:keycloak-spring-boot-starter:11.0.2'
+	implementation 'com.auth0:java-jwt:3.4.0'
 }
 
 test {
