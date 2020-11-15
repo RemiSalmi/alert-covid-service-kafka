@@ -36,3 +36,9 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+task docker(type:Exec) {
+	workingDir "./"
+	dependsOn("assemble")
+	commandLine("docker", "build", "-t", "remisalmi/alert-covid-service-kafka:${project.version}", ".")
+}
