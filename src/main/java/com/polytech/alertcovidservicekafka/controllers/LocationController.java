@@ -2,6 +2,7 @@ package com.polytech.alertcovidservicekafka.controllers;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.polytech.alertcovidservicekafka.models.*;
 import com.polytech.alertcovidservicekafka.services.JsonBodyHandler;
 import com.polytech.alertcovidservicekafka.services.LocationLogic;
@@ -16,12 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -42,13 +43,18 @@ public class LocationController {
 
     private LocationsStreamSingleton locationsStream = LocationsStreamSingleton.getInstance();
 
-    @GetMapping
-    public LinkedList<Location> getLocation() {
-        return locationsStream.getLocations();
+    @GetMapping @RequestMapping("/{id_user}")
+    public List<Location> getLocation(@RequestHeader("Authorization") String authorization, @PathVariable Long id_user) {
+        Long idUserToken = this.getIdFromAuthorization(authorization);
+        if (idUserToken.equals(id_user)){
+            return locationsStream.getUserLocations(id_user);
+        } else {
+            throw new ResponseStatusException( HttpStatus.UNAUTHORIZED, "Your not authorized to do this action" ) ;
+        }
     }
 
     @PostMapping
-    public String create(@RequestHeader("Authorization") String authorization,@RequestBody Location location) {
+    public String create(@RequestHeader("Authorization") String authorization,@Valid @RequestBody final Location location) {
         Long id_user = this.getIdFromAuthorization(authorization);
         if (id_user.equals(location.getId_user())){
             kafkaProducer.sendMessage(location, "yxffg513-covid_alert");
@@ -59,23 +65,32 @@ public class LocationController {
     }
 
     @PostMapping(value="/positive")
-    public List<Location> getContactCase(@RequestHeader("Authorization") String authorization, @RequestBody PositiveCase positiveCase) {
-        System.out.println(positiveCase);
+    public List<Location> getContactCase(@RequestHeader("Authorization") String authorization,@Valid @RequestBody final PositiveCase positiveCase) {
         Long id_user = this.getIdFromAuthorization(authorization);
         if (id_user.equals(positiveCase.getId_user())){
+
             LocationLogic locationLogic = new LocationLogic();
             List<Location> contactLocation = locationLogic.getContactLocation(locationsStream.getLocations(), positiveCase.getId_user(), positiveCase.getDate());
-            contactLocation.stream().forEach(location -> {
+            try {
+            contactLocation.forEach(location -> {
                 String userIdJson = "[" + location.getId_user() + "]";
                 try {
-                    this.postLocationService_thenCorrect(location.toJson(), authorization);
-                    this.postNotificationService_thenCorrect(userIdJson,authorization);
-                } catch (IOException e) {
+                    this.postLocationService_thenCorrect(location.toJsonForLocationService(), authorization);
+                    this.postNotificationService_thenCorrect(userIdJson,authorization); //should be donne by the location service
+                } catch (ResponseStatusException httpE) {
+                    httpE.printStackTrace();
+                    throw httpE;
+                }
+                catch (IOException e) {
                     e.printStackTrace();
-                    throw new ResponseStatusException( HttpStatus.SERVICE_UNAVAILABLE, "some service are unavailable retry later" ) ;
+                    throw new ResponseStatusException( HttpStatus.INTERNAL_SERVER_ERROR, "some service are unavailable retry later" ) ;
                 }
             });
             return contactLocation;
+            } catch (ResponseStatusException e) {
+                e.printStackTrace();
+                throw e;
+            }
         } else {
             throw new ResponseStatusException( HttpStatus.UNAUTHORIZED, "Your not authorized to do this action" ) ;
         }
@@ -98,6 +113,7 @@ public class LocationController {
         CloseableHttpResponse response = client.execute(httpPost);
         assert(response.getStatusLine().getStatusCode() == 200);
         client.close();
+        this.handleStatusCodeHttp(response.getStatusLine().getStatusCode());
     }
 
     private void postNotificationService_thenCorrect(String usersIdJson, String authorization)
@@ -114,6 +130,16 @@ public class LocationController {
         CloseableHttpResponse response = client.execute(httpPost);
         assert(response.getStatusLine().getStatusCode() == 200);
         client.close();
+        this.handleStatusCodeHttp(response.getStatusLine().getStatusCode());
+    }
+
+    private void handleStatusCodeHttp(int statusCode) {
+        switch(statusCode/100) {
+            case 5:
+                throw new ResponseStatusException( HttpStatus.SERVICE_UNAVAILABLE, "some service are unavailable retry later" ) ;
+            case 4:
+                throw new ResponseStatusException( HttpStatus.INTERNAL_SERVER_ERROR, "some service are unavailable retry later" ) ;
+        }
     }
 
     private long getIdFromAuthorization(String authorization){
