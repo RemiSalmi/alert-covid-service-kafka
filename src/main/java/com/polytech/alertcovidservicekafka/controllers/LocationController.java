@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -44,17 +43,21 @@ public class LocationController {
 
     private LocationsStreamSingleton locationsStream = LocationsStreamSingleton.getInstance();
 
-    @GetMapping
-    public LinkedList<Location> getLocation() {
-        System.out.println( locationsStream.getLocations());return locationsStream.getLocations();
+    @GetMapping @RequestMapping("/{id_user}")
+    public List<Location> getLocation(@RequestHeader("Authorization") String authorization, @PathVariable Long id_user) {
+        Long idUserToken = this.getIdFromAuthorization(authorization);
+        if (idUserToken.equals(id_user)){
+            return locationsStream.getUserLocations(id_user);
+        } else {
+            throw new ResponseStatusException( HttpStatus.UNAUTHORIZED, "Your not authorized to do this action" ) ;
+        }
     }
 
     @PostMapping
     public String create(@RequestHeader("Authorization") String authorization,@Valid @RequestBody final Location location) {
-        System.out.println(location);
         Long id_user = this.getIdFromAuthorization(authorization);
         if (id_user.equals(location.getId_user())){
-            //kafkaProducer.sendMessage(location, "yxffg513-covid_alert");
+            kafkaProducer.sendMessage(location, "yxffg513-covid_alert");
             return "Publish";
         } else {
             throw new ResponseStatusException( HttpStatus.UNAUTHORIZED, "Your not authorized to do this action" ) ;
@@ -63,21 +66,17 @@ public class LocationController {
 
     @PostMapping(value="/positive")
     public List<Location> getContactCase(@RequestHeader("Authorization") String authorization,@Valid @RequestBody final PositiveCase positiveCase) {
-        System.out.println("positive case : " + positiveCase);
         Long id_user = this.getIdFromAuthorization(authorization);
         if (id_user.equals(positiveCase.getId_user())){
 
             LocationLogic locationLogic = new LocationLogic();
             List<Location> contactLocation = locationLogic.getContactLocation(locationsStream.getLocations(), positiveCase.getId_user(), positiveCase.getDate());
-            System.out.println("contact location : " + contactLocation);
             try {
             contactLocation.forEach(location -> {
                 String userIdJson = "[" + location.getId_user() + "]";
-                System.out.println("userId" + userIdJson);
-                System.out.println("location json" + location.toJsonForLocationService());
                 try {
                     this.postLocationService_thenCorrect(location.toJsonForLocationService(), authorization);
-                    this.postNotificationService_thenCorrect(userIdJson,authorization);
+                    this.postNotificationService_thenCorrect(userIdJson,authorization); //should be donne by the location service
                 } catch (ResponseStatusException httpE) {
                     httpE.printStackTrace();
                     throw httpE;
@@ -112,7 +111,6 @@ public class LocationController {
         httpPost.setHeader("Authorization", authorization);
 
         CloseableHttpResponse response = client.execute(httpPost);
-        System.out.println(response);
         assert(response.getStatusLine().getStatusCode() == 200);
         client.close();
         this.handleStatusCodeHttp(response.getStatusLine().getStatusCode());

@@ -64,7 +64,7 @@ public class Location {
     public String toString() {
         return "Location{" +
                 "id_user=" + id_user +
-                ", LocalDateTime=" + date +
+                ", date=" + date +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
                 '}';
@@ -77,8 +77,8 @@ public class Location {
     }
 
     public String toJsonForLocationService() {
-        String jsonLocation = "{ \"id_user\":" + this.getId_user() +
-                ",\"LocalDateTime\": \"" + this.getDate().toLocalDateTime() +"\"" +
+        String jsonLocation = "{ \"idUser\":" + this.getId_user() +
+                ",\"date\": \"" + this.getDate().toLocalDateTime() +"\"" +
                 ",\"longitude\": " + this.getLongitude() +
                 ",\"latitude\": " + this.getLatitude() + "}";
         return jsonLocation;
