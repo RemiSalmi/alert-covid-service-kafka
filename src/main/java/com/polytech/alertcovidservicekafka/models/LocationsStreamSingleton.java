@@ -1,5 +1,7 @@
 package com.polytech.alertcovidservicekafka.models;
 
+import org.springframework.beans.NullValueInNestedPathException;
+
 import java.sql.Timestamp;
 import java.util.LinkedList;
 
@@ -28,6 +30,12 @@ public final class LocationsStreamSingleton {
     }
 
     public void addLocation(Location location){
-        this.locations.add(location);
+        if (location.notNull()) {
+            System.out.println("added location : " +  location);
+            this.locations.add(location);
+        } else {
+            //throw new IllegalArgumentException("location with id_user : " + location.getId_user());
+        }
+
     }
 }

@@ -50,7 +50,7 @@ public class LocationLogic {
 
                 //for each positive case location we select all the other location at the same time
                 Stream<Location> relevantLocationByDate = locationsMap.get(false).stream().filter(location -> location.getDate().equals(positiveLocation.getDate()));
-
+                System.out.println("location positive :" + positiveLocation);
                 //We calculate the point corresponding to the positive location
                 Coordinate latPositive = Coordinate.fromDegrees(positiveLocation.getLatitude());
                 Coordinate lngPositive = Coordinate.fromDegrees(positiveLocation.getLongitude());

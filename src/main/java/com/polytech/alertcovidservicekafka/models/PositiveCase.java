@@ -4,12 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.annotation.Id;
 
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 public class PositiveCase {
 
     @Id
+    @NotNull
     private Long id_user;
+    @NotNull
     private Timestamp date;
 
     public PositiveCase(Long id_user, Timestamp date) {
