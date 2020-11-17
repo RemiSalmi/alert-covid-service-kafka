@@ -5,21 +5,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 public class Location {
-    @Id
+    @Id @NotNull
     private long id_user;
-    @Id
+    @Id @NotNull
     private Timestamp date;
-    @Id
+    @Id @NotNull
     private Double longitude;
-    @Id
+    @Id @NotNull
     private Double latitude;
 
-    public Location(long id_user, Timestamp date, Double longitude, Double latitude) {
+    public Location(long id_user, Timestamp LocalDateTime, Double longitude, Double latitude) {
         this.id_user = id_user;
-        this.date = date;
+        this.date = LocalDateTime;
         this.longitude = longitude;
         this.latitude = latitude;
     }
@@ -59,13 +60,31 @@ public class Location {
         this.latitude = latitude;
     }
 
-    public String toString(){
-        return "Je suis l'user avec l'id: " + this.getId_user() +"\nDate: " +this.getDate();
+    @Override
+    public String toString() {
+        return "Location{" +
+                "id_user=" + id_user +
+                ", date=" + date +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                '}';
     }
 
     public String toJson() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         // Java object to JSON string
         return mapper.writeValueAsString(this);
+    }
+
+    public String toJsonForLocationService() {
+        String jsonLocation = "{ \"idUser\":" + this.getId_user() +
+                ",\"date\": \"" + this.getDate().toLocalDateTime() +"\"" +
+                ",\"longitude\": " + this.getLongitude() +
+                ",\"latitude\": " + this.getLatitude() + "}";
+        return jsonLocation;
+    }
+
+    public boolean notNull() {
+        return (this.date != null && this.latitude != null && this.longitude != null);
     }
 }
