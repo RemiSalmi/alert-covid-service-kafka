@@ -51,15 +51,15 @@ public class LocationLogic {
 
                 //We calculate contact time window to the positive location
                 calendarTool.setTime(positiveLocation.getDate());
-                calendarTool.add(Calendar.DAY_OF_WEEK, contactTimeWindowInMinute);
-                Timestamp positiveLocationDatePlus = new Timestamp(calendarTool.getTime().getTime());
+                calendarTool.add(Calendar.MINUTE, contactTimeWindowInMinute);
+                Timestamp positiveLocationDateNewest = new Timestamp(calendarTool.getTime().getTime());
                 calendarTool.setTime(positiveLocation.getDate());
                 calendarTool.add(Calendar.MINUTE, -contactTimeWindowInMinute);
-                Timestamp positiveLocationDateMinus = new Timestamp(calendarTool.getTime().getTime());
+                Timestamp positiveLocationDateOlder = new Timestamp(calendarTool.getTime().getTime());
 
                 //for each positive case location we select all the other location iatn the window time
                 Stream<Location> relevantLocationByDate = locationsMap.get(false).stream().filter(location -> {
-                   return dateIsBetween(location.getDate(),positiveLocationDateMinus,positiveLocationDatePlus);
+                   return dateIsBetween(location.getDate(),positiveLocationDateOlder,positiveLocationDateNewest);
                 });
 
                 //We calculate the point corresponding to the positive location

@@ -75,11 +75,12 @@ public class LocationLogicTest {
     @Test
     public void testPositiveThatMatchOnMultiplePosition() throws Exception {
 
-        Timestamp twelveNovemberTime = new Timestamp(1605214800);
-        Timestamp twelveNovemberTimeTwoMinMore = new Timestamp(1605214980);
-        Timestamp thirteenNovemberTime = new Timestamp(1605225600);
-        Timestamp twelveNovemberTimeOtherYear = new Timestamp(1573592400);
-        Timestamp twoNovemberTime = new Timestamp(1604319132);
+        Timestamp twelveNovemberTime = new Timestamp(1605214800000L);
+        Timestamp twelveNovemberTimeTwoMinMore = new Timestamp(1605214980000L);
+        Timestamp twelveNovemberTime7MinMore = new Timestamp(1605215220000L);
+        Timestamp thirteenNovemberTime = new Timestamp(1605225600000L);
+        Timestamp twelveNovemberTimeOtherYear = new Timestamp(1573592400000L);
+        Timestamp twoNovemberTime = new Timestamp(1604319132000L);
 
         Location ourUserLocation = new Location(1,twelveNovemberTime,3.8719315,43.6248723);
         Location otherUser2Location = new Location(2,twelveNovemberTime,11.0,12.0);
@@ -88,13 +89,14 @@ public class LocationLogicTest {
         Location otherUser6Location = new Location(6,twelveNovemberTime,43.6248723,3.8719315);
         Location otherUser7Location = new Location(7,thirteenNovemberTime,-23.5589681,-109.0758897);
         Location otherUser8Location = new Location(8,twoNovemberTime,3.8719315,43.6248723);
+        Location otherUser10Location = new Location(10,twelveNovemberTime7MinMore,3.8719315,43.6248723);
 
         //positives locations
         Location otherUser9Location = new Location(9,twelveNovemberTimeTwoMinMore,3.8719316,43.6248725);
         Location otherUser3Location = new Location(3,twelveNovemberTime,3.8719315,43.6248723);
 
         LinkedList<Location> testList = new LinkedList<>();
-        Collections.addAll(testList,ourUserLocation,otherUser2Location,otherUser3Location,otherUser4Location,otherUser5Location,otherUser6Location,otherUser7Location,otherUser8Location,otherUser9Location);
+        Collections.addAll(testList,ourUserLocation,otherUser2Location,otherUser3Location,otherUser4Location,otherUser5Location,otherUser6Location,otherUser7Location,otherUser8Location,otherUser9Location,otherUser10Location);
 
         Long id_user = 1l;
 

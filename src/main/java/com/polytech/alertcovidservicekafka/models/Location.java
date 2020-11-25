@@ -18,9 +18,9 @@ public class Location {
     @Id @NotNull
     private Double latitude;
 
-    public Location(long id_user, Timestamp LocalDateTime, Double longitude, Double latitude) {
+    public Location(long id_user, Timestamp date, Double longitude, Double latitude) {
         this.id_user = id_user;
-        this.date = LocalDateTime;
+        this.date = date;
         this.longitude = longitude;
         this.latitude = latitude;
     }
