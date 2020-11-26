@@ -53,13 +53,10 @@ public class LocationLogic {
                 calendarTool.setTime(positiveLocation.getDate());
                 calendarTool.add(Calendar.MINUTE, contactTimeWindowInMinute);
                 Timestamp positiveLocationDateNewest = new Timestamp(calendarTool.getTime().getTime());
-                calendarTool.setTime(positiveLocation.getDate());
-                calendarTool.add(Calendar.MINUTE, -contactTimeWindowInMinute);
-                Timestamp positiveLocationDateOlder = new Timestamp(calendarTool.getTime().getTime());
 
                 //for each positive case location we select all the other location iatn the window time
                 Stream<Location> relevantLocationByDate = locationsMap.get(false).stream().filter(location -> {
-                   return dateIsBetween(location.getDate(),positiveLocationDateOlder,positiveLocationDateNewest);
+                   return dateIsBetween(location.getDate(),positiveLocation.getDate(),positiveLocationDateNewest);
                 });
 
                 //We calculate the point corresponding to the positive location
@@ -86,7 +83,7 @@ public class LocationLogic {
     }
 
     private Boolean dateIsBetween(Timestamp dateToTest,Timestamp olderDate, Timestamp newestDate) {
-        return dateToTest.after(olderDate) && dateToTest.before(newestDate);
+        return (dateToTest.after(olderDate) && dateToTest.before(newestDate)) || dateToTest.equals(olderDate) || dateToTest.equals(newestDate);
     }
 
     @Override
